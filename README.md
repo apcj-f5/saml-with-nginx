@@ -3,7 +3,7 @@
 Reference implementation of NGINX Plus as service provider for SAML
 authentication
 
-# Table of contents
+## Table of contents
 
 - [SAML SSO support for NGINX Plus](#saml-sso-support-for-nginx-plus)
 - [Table of contents](#table-of-contents)
@@ -35,7 +35,7 @@ authentication
 - [Configuring NGINX Plus](#configuring-nginx-plus)
   - [Configuring the Key-Value Store](#configuring-the-key-value-store)
 
-# Description
+## Description
 
 This project provides an implementation of SAML Single Sign-On (SSO) for NGINX
 Plus. It enables NGINX Plus to act as a SAML Service Provider (SP), allowing it
@@ -98,7 +98,7 @@ and session validity period is enforced by `saml_session_access` keyval zone
 timeout (default is 1 hour). After the session timeout expires, the user will be
 redirected to IdP for re-authentication.
 
-# SAML Authentication Request
+## SAML Authentication Request
 
 The SAML authentication request, also known as the SAML AuthnRequest, is a
 message sent by the SP to the IdP to initiate the SSO process. AuthnRequest
@@ -145,7 +145,7 @@ configured via `$saml_sp_signing_key` variable.
 > HTTP-Redirect binding. Additionally, the signature algorithm cannot be
 > customized and is always set to rsa-sha256.
 
-# SAML Authentication Response
+## SAML Authentication Response
 
 The SAML authentication response is a message sent by the IdP to the SP in
 response to the SAML AuthnRequest. The SAML Response contains the user’s
@@ -227,7 +227,7 @@ response to a successful sign-on attempt looks like the following sample:
 Upon receiving the SAML response, NGINX Plus performs a series of validations
 and checks to ensure a secure and compliant SSO implementation.
 
-## Response
+### Response
 
 The Response element includes the result of the authorization request. NGINX
 Plus checks the "ID" to ensure it has not been reused, providing protection
@@ -239,12 +239,12 @@ element. It also verifies the following attributes (only if they are present):
 - `InResponseTo`: must match the `ID` attribute of the AuthnRequest element that
   initiated the response.
 
-## Issuer
+### Issuer
 
 NGINX Plus verifies the `Issuer` element, which must match the IdP EntityID
 defined by the `$saml_idp_entity_id` variable.
 
-## Status
+### Status
 
 The `Status` element conveys the success or failure of the SSO. It can include
 the `StatusCode` element, which contains a code or a set of nested codes that
@@ -253,13 +253,13 @@ contains custom error messages that are generated during the sign-on process by
 IdP. If the status does not match `urn:oasis:names:tc:SAML:2.0:status:Success`,
 access to the protected resource is denied.
 
-## Assertion
+### Assertion
 
 The Assertion is validated using the same approach as the Response, with the
 exception that we do not check the `ID` for replay attacks. Therefore, we
 recommend always signing the entire Response to ensure security.
 
-### Subject
+#### Subject
 
 The `Subject` element specifies the principle that is the subject of the
 statements in the assertion. It must contain a `NameID` element, which
@@ -269,7 +269,7 @@ describes the format or namespace of the `NameID`. When processing the Subject,
 NGINX Plus parses both the NameID and the NameID Format, which are then stored
 in the `$saml_name_id` and `$saml_name_id_format` variables, respectively.
 
-### Conditions
+#### Conditions
 
 The `Conditions` element defines the conditions under which the SAML Assertion
 is considered valid. It is a mandatory element, and an assertion without it will
@@ -279,7 +279,7 @@ specified time window. It does not account for any time difference between
 itself and the Identity Provider nor does it add any buffer to these time
 values.
 
-### Audience
+#### Audience
 
 If the `AudienceRestriction` element is present, it restricts the assertion's
 applicability to specific intended audiences, or Service Providers, to which it
@@ -288,7 +288,7 @@ specified by the `$saml_sp_entity_id` variable, is listed as an acceptable
 audience for the assertion. This step ensures that the assertion is intended for
 the correct Service Provider and prevents unauthorized access to resources.
 
-### AuthnStatement
+#### AuthnStatement
 
 The `AuthnStatement` element asserts that the subject of the assertion has been
 authenticated using specific means at a particular time. If it contains a
@@ -304,7 +304,7 @@ stored in the `$saml_authn_context_class_ref` variable. This information can be
 useful for understanding the level of assurance provided by the authentication
 method and for making access control decisions based on that level of assurance.
 
-### AttributeStatement
+#### AttributeStatement
 
 The `AttributeStatement` element contains assertions about the subject or user.
 During the processing, we currently store only the `AttributeValue` in key-value
@@ -314,7 +314,7 @@ allows you to store and access user attributes provided by the Identity Provider
 for use in access control decisions, personalization, or other custom
 functionality within your application.
 
-## Response or Assertion Signature
+### Response or Assertion Signature
 
 The Identity Provider can choose to sign either the entire SAML Response or just
 the Assertion within the response upon successful authentication. The Signature
@@ -350,7 +350,7 @@ The following digest algorithms are supported:
 - <http://www.w3.org/2000/09/xmldsig#sha1>
 - <http://www.w3.org/2001/04/xmlenc#sha256>
 
-## Encrypted Assertion or NameID elements
+### Encrypted Assertion or NameID elements
 
 A SAML Response may contain `EncryptedAssertion` and `EncryptedID` elements,
 which represent encrypted `Assertion` and `NameID` elements, respectively. NGINX
@@ -374,7 +374,7 @@ The following data encryption algorithms are supported:
 - <http://www.w3.org/2009/xmlenc11#aes192-gcm>
 - <http://www.w3.org/2009/xmlenc11#aes256-gcm>
 
-## Redirect user after successful login
+### Redirect user after successful login
 
 After receiving a SAML Response with a successful status, the user is redirected
 by default to the address preceding the authentication request. If you want to
@@ -388,7 +388,7 @@ user will be redirected to the address specified in the RelayState if it is
 present. If the RelayState is not provided, the user will be redirected to the
 application's root.
 
-# SAML Single Logout
+## SAML Single Logout
 
 SAML Single Logout (SLO) is a feature that allows users to log out from all
 service providers (SPs) and identity providers (IdPs) involved in an SSO session
@@ -428,7 +428,7 @@ we use the `/saml/sls` location, which can be modified in the
 `$saml_sp_slo_url` variable, which reflects the full URL, including the scheme
 (http or https) and domain name, corresponding to your service provider.
 
-## SP-Initiated Logout
+### SP-Initiated Logout
 
 In the SP-initiated logout process, NGINX Plus initiates the logout by sending a
 LogoutRequest message to the identity provider (IdP). Upon receiving the
@@ -436,7 +436,7 @@ LogoutRequest, the IdP is responsible for terminating the user's session and
 then sending a LogoutResponse message back to NGINX Plus, confirming the
 successful completion of the logout process.
 
-### Sending LogoutRequest
+#### Sending LogoutRequest
 
 When NGINX Plus creates and sends the LogoutRequest message, the destination for
 the request is determined by the `$saml_idp_slo_url` variable. This variable
@@ -470,7 +470,7 @@ that when NGINX Plus sends a LogoutRequest, only the `NameID` parameter is
 included in the message, allowing the IdP to identify the user session to be
 terminated.
 
-### Receiving LogoutResponse
+#### Receiving LogoutResponse
 
 After sending a LogoutRequest message to the IdP, NGINX Plus waits for the IdP
 to send a LogoutResponse message back. This message indicates the status of the
@@ -505,7 +505,7 @@ Upon successful logout, the user is redirected to the URL specified by the
 `$saml_logout_landing_page` variable. This is typically a non-authenticated page
 that says goodbye to the user and does not require any further authentication.
 
-## IdP-Initiated Logout
+### IdP-Initiated Logout
 
 In the IdP-initiated logout process, the IdP initiates the logout by sending a
 LogoutRequest message to NGINX Plus. Upon receiving the LogoutRequest, NGINX
@@ -513,7 +513,7 @@ Plus is responsible for terminating the user's session and then sending a
 LogoutResponse message back to the IdP, confirming the successful completion of
 the logout process.
 
-### Receiving LogoutRequest
+#### Receiving LogoutRequest
 
 In the IdP-initiated logout process, NGINX Plus receives a LogoutRequest message
 from the IdP without prior SP-initiated communication. The LogoutRequest message
@@ -535,7 +535,7 @@ However, it is important to note that if NGINX Plus receives a LogoutRequest
 message for a non-existent session, it will still return a success status, as
 this complies with the SAML standard.
 
-### Sending LogoutResponse
+#### Sending LogoutResponse
 
 In the IdP-initiated logout process, after receiving and processing the
 LogoutRequest message from the identity provider (IdP), NGINX Plus sends a
@@ -548,7 +548,7 @@ The decision whether to sign the LogoutResponse message is determined by the
 the LogoutResponse message before sending it to the IdP, ensuring the
 authenticity and integrity of the message.
 
-## Disabling Single Logout (SLO)
+### Disabling Single Logout (SLO)
 
 There might be cases where you need to disable SLO, for example, if your IdP
 doesn't support it, or if you don't want SLO to initiate the logout process for
@@ -567,7 +567,7 @@ the "force_authn = true" parameter in the AuthnRequest. For more information,
 refer to the description of the `$saml_sp_force_authn` variable in the
 `saml_sp_configuration.conf` file.
 
-# Installation
+## Installation
 
 Start by
 [installing NGINX Plus](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-plus/).
@@ -594,7 +594,7 @@ Finally, create a clone of the GitHub repository.
 
 All files can be copied to **/etc/nginx/conf.d**
 
-## Non-standard directories
+### Non-standard directories
 
 The GitHub repository contains
 [`include`](http://nginx.org/en/docs/ngx_core_module.html#include) files for
@@ -609,7 +609,7 @@ configuration files are located.
 nginx -p /path/to/conf -c /path/to/conf/nginx.conf
 ```
 
-# Configuring NGINX Plus
+## Configuring NGINX Plus
 
 Configuration can typically be completed automatically by using SAML Metadata.
 SAML Metadata is a standard way of exchanging metadata information between SAML
@@ -621,8 +621,9 @@ communicate configuration information, such as endpoints, signing keys, etc.
 Manual configuration involves reviewing the following files so that they match
 your IdP(s) configuration.
 
-- [conf.d/saml_sp_configuration.conf] - this contains the primary configuration
-  for one or more SPs and IdPs in `map{}` blocks
+- [conf.d/saml_sp_configuration.conf](https://github.com/apcj-f5/saml-with-nginx/blob/main/conf.d/saml_sp_configuration.conf) -
+  this contains the primary configuration for one or more SPs and IdPs in
+  `map{}` blocks
 
   - Modify all of the `map…$saml_sp_` blocks to match your SP configuration
   - Modify all of the `map…$saml_idp_` blocks to match your IdP configuration
@@ -632,7 +633,8 @@ your IdP(s) configuration.
     `map…$redirect_base` and `map…$proto` blocks to define how to obtain the
     original protocol and port number.
 
-- [conf.d/frontend.conf] - this is the reverse proxy configuration
+- [conf.d/frontend.conf](https://github.com/apcj-f5/saml-with-nginx/blob/main/conf.d/frontend.conf) -
+  this is the reverse proxy configuration
 
   - Modify the upstream group to match your backend site or app
   - Configure the preferred listen port and
@@ -640,18 +642,18 @@ your IdP(s) configuration.
   - Modify the severity level of the `error_log` directive to suit the
     deployment environment
 
-- [conf.d/saml_sp.server_conf] - this is the NGINX configuration for handling
-  IdP Responses
+- [conf.d/saml_sp.server_conf](https://github.com/apcj-f5/saml-with-nginx/blob/main/conf.d/saml_sp.server_conf) -
+  this is the NGINX configuration for handling IdP Responses
 
   - No changes are usually required here
   - Modify the `client_body_buffer_size` directive to match the maximum size of
     IdP response (post body)
 
-- [conf.d/saml_sp.js] - this is the JavaScript code for performing the SAML
-  Authentication
+- [conf.d/saml_sp.js](https://github.com/apcj-f5/saml-with-nginx/blob/main/conf.d/saml_sp.js) -
+  this is the JavaScript code for performing the SAML Authentication
   - No changes are required
 
-## Configuring the Key-Value Store
+### Configuring the Key-Value Store
 
 This is part of the advanced configuration in **saml_sp_configuration.conf**.
 
