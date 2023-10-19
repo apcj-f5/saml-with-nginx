@@ -27,7 +27,7 @@ location = /saml/acs {
     # Receiving and processing SAML <samlp:Response> messages from IdP.
     js_content samlsp.handleSingleSignOn;
     status_zone "SAMLSSO ACS";
-    error_page 500 @saml_error; 
+    error_page 500 @saml_error;
 }
 
 location = /saml/sls {
@@ -36,7 +36,7 @@ location = /saml/sls {
     # or <samlp:LogoutRequest> messages from IdP.
     js_content samlsp.handleSingleLogout;
     status_zone "SAMLSSO SLS";
-    error_page 500 @saml_error; 
+    error_page 500 @saml_error;
 }
 
 location @do_samlsp_flow {

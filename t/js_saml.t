@@ -66,7 +66,7 @@ http {
     map $host $saml_debug {
         default "1";
     }
-    
+
     keyval_zone zone=saml_sp_entity_id:1M state=%%TESTDIR%%/saml_sp_entity_id.json;
     keyval $host $saml_sp_entity_id zone=saml_sp_entity_id;
 
@@ -81,7 +81,7 @@ http {
 
     keyval_zone zone=saml_sp_signing_key:1M state=%%TESTDIR%%/saml_sp_signing_key.json;
     keyval $host $saml_sp_signing_key zone=saml_sp_signing_key;
-    
+
     keyval_zone zone=saml_sp_decryption_key:1M state=%%TESTDIR%%/saml_sp_decryption_key.json;
     keyval $host $saml_sp_decryption_key zone=saml_sp_decryption_key;
 
@@ -179,13 +179,13 @@ http {
         location = /saml/acs {
             js_content samlsp.handleSingleSignOn;
             status_zone "SAMLSSO ACS";
-            error_page 500 @saml_error; 
+            error_page 500 @saml_error;
         }
 
         location = /saml/sls {
             js_content samlsp.handleSingleLogout;
             status_zone "SAMLSSO SLS";
-            error_page 500 @saml_error; 
+            error_page 500 @saml_error;
         }
 
         location @do_samlsp_flow {
@@ -615,7 +615,7 @@ like(get('/', auth_token => get_auth_token($r)), qr/Welcome user1/,
 
 # Logout Request
 
-$r = parse_response(get('/logout', 
+$r = parse_response(get('/logout',
 	auth_token => get_auth_token(init_sso($cfg))));
 
 is($r->{Action}, $cfg->{saml_idp_slo_url}, 'sp logout request post action');
@@ -899,7 +899,7 @@ sub parse_http_302 {
 sub parse_http_200 {
 	my ($r) = @_;
 	my ($dest) = $r =~ /<form method="post" action="(.*?)">/;
-	my ($saml_base64) = $r =~ 
+	my ($saml_base64) = $r =~
 		/name="(?:SAMLResponse|SAMLRequest)" value="(.*?)"/;
 	my ($relay_state) = $r =~ /name="RelayState" value="(.*?)"/;
 	return ($dest, $saml_base64, $relay_state);
@@ -909,7 +909,7 @@ sub inflate_base64 {
 	my ($saml_base64) = @_;
 	my $deflated = decode_base64(uri_unescape($saml_base64));
 	my $xml_str;
-	rawinflate(\$deflated => \$xml_str) 
+	rawinflate(\$deflated => \$xml_str)
 		or die "rawinflate failed: $RawInflateError\n";
 	return $xml_str;
 }
@@ -931,7 +931,7 @@ sub extract_saml_attributes {
 
 	my ($signature_node) = $xpc->findnodes('//ds:Signature');
 	if ($signature_node) {
-		$result->{isValid} = 
+		$result->{isValid} =
 			verify_saml_signature($signature_node,$sp_pub);
 	} else {
 		$result->{isSigned} = 0;
@@ -939,7 +939,7 @@ sub extract_saml_attributes {
 
 	my ($name_id_policy_node) = $xpc->findnodes('//samlp:NameIDPolicy');
 	if ($name_id_policy_node) {
-		$result->{NameIDPolicyFormat} = 
+		$result->{NameIDPolicyFormat} =
 			$name_id_policy_node->getAttribute('Format');
 	}
 
@@ -1234,12 +1234,12 @@ sub validate_saml_signature {
 		die "Unsupported signature algorithm: $signature_algorithm";
 	}
 
-	my ($signature_value_node) = 
+	my ($signature_value_node) =
 		$xpc->findnodes('./ds:SignatureValue', $signature_node);
 	my $signature_value_base64 = $signature_value_node->textContent;
 	my $signature_value = decode_base64($signature_value_base64);
 
-	my ($reference_node) = 
+	my ($reference_node) =
 		$xpc->findnodes('./ds:Reference', $signed_info_node);
 	my $id_attr = $reference_node->getAttribute('URI');
 	$id_attr =~ s/^#//;
@@ -1313,7 +1313,7 @@ sub digest_saml {
 	$xpc->registerNs('ds', 'http://www.w3.org/2000/09/xmldsig#');
 
 	my $parent_node = $signature_node->parentNode;
-	
+
 	my ($signed_info_node) =
 		$xpc->findnodes('./ds:SignedInfo', $signature_node)->[0];
 	my ($reference_node) =
@@ -1623,7 +1623,7 @@ my $logout_response = <<END_XML;
 	</samlp:Status>
 </samlp:LogoutResponse>
 END_XML
-	
+
 	if ($type eq 'Response') {
 		return $response;
 	} elsif ($type eq 'LogoutRequest') {
